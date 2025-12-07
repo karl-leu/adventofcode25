@@ -18,9 +18,10 @@ $lines = Get-Content $InputFile | Where-Object { $_ -ne "" }
 
 # Example processing: parse lines of form LetterNumber (e.g. 'L68')
 # Separate into a letters file and a numbers file, and compute sum of numbers
-[long]$pwd = 0
+[long]$zeros = 0
 [long]$dialpos = 50
 [long]$tmp = 0
+[long]$passZeros = 0
 
 foreach ($line in $lines) {
     # parse line
@@ -31,9 +32,28 @@ foreach ($line in $lines) {
         $num = [long]$matches[2]
 
         # add or subtract from dial position
-        if ($letter -eq 'L') {
+        if (
+            $letter -eq 'L') {
+            $tmp = $num
+            while (($dialpos % 100 -ne 0) -and ($tmp -gt $dialpos)) {
+                $passZeros += 1
+                $tmp -= 100
+                write-output "ZeroPass Dial Pos: $dialpos clicks:< $num zeroPass : $passZeros Pwd: $zeros"
+            }
+            if (($num -ge $dialpos) -and (($dialpos - $num) % 100 -eq 0)) {
+                $passZeros += 1
+            } 
             $dialpos -= $num
         } elseif ($letter -eq 'R') {
+            $tmp = $num
+            while (($dialpos % 100 -ne 0) -and ($tmp -gt 100-$dialpos)) {
+                $passZeros += 1
+                $tmp -= 100
+                write-output "ZeroPass Dial Pos: $dialpos clicks:> $num zeroPass : $passZeros Pwd: $zeros"
+            }
+            if (($num -ge 100-$dialpos) -and (($dialpos + $num) % 100 -eq 0)) {
+                $passZeros += 1
+            } 
             $dialpos += $num
         }
         # adjust dial position to wrap around 0-99
@@ -45,11 +65,10 @@ foreach ($line in $lines) {
         }
         # check dial position for zero or 100
         if ($dialpos % 100 -eq 0) {
-            $pwd += 1
+            $zeros += 1
         }   
-        write-output "Dial position : $dialpos clicks: $num Pwd: $pwd"
+        write-output "Dial position : $dialpos clicks $letter : $num zeroPass : $passZeros Pwd: $zeros"
 
-        $sum += $num
     } else {
         Write-Warning "Skipping non-matching line: '$line'"
     }
@@ -57,7 +76,10 @@ foreach ($line in $lines) {
 
 
 Write-Output "Lines: $($lines.Count)"
-Write-Output "Pwd: $pwd"
+Write-Output "Zeros: $zeros"
+Write-Output "PassZeros: $passZeros"
+[long]$TOTAL = $zeros+$passZeros
+Write-Output "TOTAL: $TOTAL"
 
 # Example usage:
 #   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\Day1\script.ps1
