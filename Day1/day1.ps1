@@ -20,8 +20,7 @@ $lines = Get-Content $InputFile | Where-Object { $_ -ne "" }
 # Separate into a letters file and a numbers file, and compute sum of numbers
 [long]$pwd = 0
 [long]$dialpos = 50
-$letters = New-Object System.Collections.Generic.List[string]
-$numbers = New-Object System.Collections.Generic.List[long]
+[long]$tmp = 0
 
 foreach ($line in $lines) {
     # parse line
@@ -48,21 +47,14 @@ foreach ($line in $lines) {
         if ($dialpos % 100 -eq 0) {
             $pwd += 1
         }   
-        write-output "Dial position : $dialpos Pwd: $pwd"
+        write-output "Dial position : $dialpos clicks: $num Pwd: $pwd"
 
-        $letters.Add($letter)
-        $numbers.Add($num)
         $sum += $num
     } else {
         Write-Warning "Skipping non-matching line: '$line'"
     }
 }
 
-# Write outputs
-$lettersFile = Join-Path $PSScriptRoot 'letters.txt'
-$numbersFile = Join-Path $PSScriptRoot 'numbers.txt'
-$letters | Out-File -FilePath $lettersFile -Encoding utf8
-$numbers | Out-File -FilePath $numbersFile -Encoding utf8
 
 Write-Output "Lines: $($lines.Count)"
 Write-Output "Pwd: $pwd"
