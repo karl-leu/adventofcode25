@@ -70,7 +70,7 @@ function Get-DigitStringsFromFile {
 
 
 
-function Get-TwoHighestDigits {
+function Get-HighestDigits {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
@@ -86,6 +86,7 @@ function Get-TwoHighestDigits {
     process {
         # Normalize and validate
         $s = $InputNumber.Trim()
+        $jLength = 2
 
         if (-not ($s -match '^\d+$')) {
             throw "Input must contain digits only (0-9)."
@@ -94,10 +95,36 @@ function Get-TwoHighestDigits {
             throw "Input must be at most 100 digits long."
         }
 
-        # First pass: highest digit (first occurrence from the left)
+        $joltage = ""
+        $jDigit = 1 
+        $sIndex = 0
+        $bestDigit = -1
+        $bestIdx = -1    
+
+        for ($jDigit = 1; $jDigit -le $jLength; $jDigit++) {
+            $bestDigit = -1
+            $bestIdx = -1
+            $lastIndex = $s.Length - ($jLength - $jDigit)
+
+            for ($i = $sIndex; $i -lt $lastIndex; $i++) {    
+                $d = [int]::Parse($s[$i])  # robust digit conversion
+                if ($d -gt $bestDigit) {
+                    $bestDigit = $d
+                    $bestIdx = $i
+                }
+
+                if ($bestDigit -eq 9) { break } # can't beat 9
+            }
+
+        $joltage = $joltage + $bestDigit
+        $sIndex = $i
+        $jDigit++
+        }
+
+<#
         $bestDigit = -1
         $bestIdx = -1
-        for ($i = 0; $i -lt $s.Length; $i++) {
+        for ($i = 0; $i -lt $s.Length-1; $i++) {
             $d = [int]::Parse($s[$i])  # robust digit conversion
             if ($d -gt $bestDigit) {
                 $bestDigit = $d
@@ -106,10 +133,9 @@ function Get-TwoHighestDigits {
             }
         }
 
-        # Second pass: next highest digit, skipping the index of the first
         $secondDigit = -1
-        $secondIdx = -1
-        for ($i = 0; $i -lt $s.Length; $i++) {
+        $secondIdx = $bestIdx
+        for ($i = $bestIdx; $i -lt $s.Length; $i++) {
             $d = [int]::Parse($s[$i])  # robust digit conversion
             if (($d -gt $secondDigit) -and ($i -ne $bestIdx)) {   
                 $secondDigit = $d
@@ -118,18 +144,17 @@ function Get-TwoHighestDigits {
             }
         }
 
+        #>
+
         [pscustomobject]@{
            Input       = $s
-           FirstDigit  = $bestDigit
-           FirstIndex  = $bestIdx
-           SecondDigit = $secondDigit
-           SecondIndex = $secondIdx
+           Joltage     = $joltage
         }
     }
 }
 
 
-$InputFile = (Join-Path $PSScriptRoot "test.txt")
+$InputFile = (Join-Path $PSScriptRoot "input.txt")
 if (-not (Test-Path $InputFile)) { throw "Input file not found: $InputFile" }
 
 $batteries = Get-DigitStringsFromFile -Path $InputFile 
@@ -137,7 +162,7 @@ $batteries | Format-Table -AutoSize
 
 $sum1 = 0
 foreach ($battery in $batteries) {
-    $res = Get-TwoHighestDigits -InputNumber $battery
+    $res = Get-HighestDigits -InputNumber $battery
     Write-Output $res
     $joltage = $res.FirstDigit * 10 + $res.SecondDigit;
     $sum1 += $joltage
