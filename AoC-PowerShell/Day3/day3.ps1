@@ -86,7 +86,7 @@ function Get-HighestDigits {
     process {
         # Normalize and validate
         $s = $InputNumber.Trim()
-        $jLength = 2
+        
 
         if (-not ($s -match '^\d+$')) {
             throw "Input must contain digits only (0-9)."
@@ -94,9 +94,9 @@ function Get-HighestDigits {
         if ($s.Length -gt 100) {
             throw "Input must be at most 100 digits long."
         }
-
+        $jLength = 12
         $joltage = ""
-        $jDigit = 1 
+         
         $sIndex = 0
         $bestDigit = -1
         $bestIdx = -1    
@@ -116,35 +116,9 @@ function Get-HighestDigits {
                 if ($bestDigit -eq 9) { break } # can't beat 9
             }
 
-        $joltage = $joltage + $bestDigit
-        $sIndex = $i
-        $jDigit++
+            $joltage = $joltage + $bestDigit
+            $sIndex = ++$bestIdx
         }
-
-<#
-        $bestDigit = -1
-        $bestIdx = -1
-        for ($i = 0; $i -lt $s.Length-1; $i++) {
-            $d = [int]::Parse($s[$i])  # robust digit conversion
-            if ($d -gt $bestDigit) {
-                $bestDigit = $d
-                $bestIdx = $i
-                if ($bestDigit -eq 9) { break } # can't beat 9
-            }
-        }
-
-        $secondDigit = -1
-        $secondIdx = $bestIdx
-        for ($i = $bestIdx; $i -lt $s.Length; $i++) {
-            $d = [int]::Parse($s[$i])  # robust digit conversion
-            if (($d -gt $secondDigit) -and ($i -ne $bestIdx)) {   
-                $secondDigit = $d
-                $secondIdx = $i
-                if ($secondDigit -eq 9) { break } # can't beat 9
-            }
-        }
-
-        #>
 
         [pscustomobject]@{
            Input       = $s
@@ -164,7 +138,7 @@ $sum1 = 0
 foreach ($battery in $batteries) {
     $res = Get-HighestDigits -InputNumber $battery
     Write-Output $res
-    $joltage = $res.FirstDigit * 10 + $res.SecondDigit;
+    $joltage = [long]$res.Joltage
     $sum1 += $joltage
 }
 
