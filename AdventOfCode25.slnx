@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="AoC-CommandLine/AoC-CommandLine.csproj" />
+  <Project Path="AoC-Day5/AoC-Day5.csproj" Id="1239bdb7-d4cf-4ba8-9906-175932865794" />
   <Project Path="AoC-PowerShell/AoC-PowerShell.csproj" Id="f49bf607-e8a0-4897-8d26-f7a756555b97" />
   <Project Path="AoC-PythonApp/AoC-PythonApp.pyproj" Type="888888a0-9f3d-457c-b088-3a5042f75d52" Id="128f9d81-9096-457b-8a5f-659fa0f1f693">
     <Build Project="false" />
